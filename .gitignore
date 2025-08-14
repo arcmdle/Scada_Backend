@@ -1,0 +1,63 @@
+# 🚫 Archivos de compilación
+target/
+build/
+out/
+
+# 🧪 Archivos generados por Maven/Gradle
+.mvn/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+.gradle/
+.gradle-cache/
+*.class
+*.jar
+*.war
+*.ear
+
+# 🔐 Archivos de configuración local
+*.env
+*.local
+*.properties.local
+application-*.yml
+application-*.properties
+
+# 🧠 Logs y dumps
+*.log
+*.pid
+hs_err_pid*
+
+# 🧰 IDEs y herramientas
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse / STS
+.classpath
+.project
+.settings/
+.springBeans
+.sts4-cache
+.apt_generated
+.factorypath
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# VS Code
+.vscode/
+
+# 🧼 Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# 📦 Otros
+*.bak
+*.tmp
+*.swp

@@ -1,0 +1,26 @@
+server:
+  port: 3000
+spring:
+  #  datasource
+  datasource:
+    url: jdbc:postgresql://localhost:5432/scadadb
+    username: sa
+    password: sa
+  # jpa
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+logging:
+  level:
+    org.hibernate: error
+    root: info
+    com.arcsolutions: debug
+
+security:
+  jwt:
+    secret-key: "v1OiD9Iv60wPawoBYTnDC8lynAgeLE1k+0SoUYEktPM="
+    expiration: 1440
+
