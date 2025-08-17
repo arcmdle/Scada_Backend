@@ -1,11 +1,11 @@
 package com.arcsolutions.scada_backend.infrastructure.dtos;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record DataSensorDto(
         String sensorId,
         Double levelCm,
         Double levelPercentage,
-        LocalDateTime timestamp
+        Instant timestamp
 ) {
 }

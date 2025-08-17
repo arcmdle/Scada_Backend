@@ -3,7 +3,7 @@ package com.arcsolutions.scada_backend.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Getter
 @Setter
@@ -20,5 +20,5 @@ public class DataSensor {
     private Double distance;
     private Double levelCm;
     private Double levelPercentage;
-    private LocalDateTime timestamp;
+    private Instant timestamp;
 }

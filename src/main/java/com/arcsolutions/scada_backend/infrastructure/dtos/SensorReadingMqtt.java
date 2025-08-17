@@ -1,12 +1,12 @@
 package com.arcsolutions.scada_backend.infrastructure.dtos;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record SensorReadingMqtt(
         String sensorId,
         double distance,
         String unit,
-        LocalDateTime timestamp
+        Instant timestamp
 
 ) {
 }

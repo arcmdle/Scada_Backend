@@ -2,10 +2,8 @@ package com.arcsolutions.scada_backend.infrastructure.dtos;
 
 import java.time.Instant;
 
-public record ManualValveDto(
-
-        String valveId,
-        boolean newStatus,
+public record SetpointResDto(
+        Double setpoint,
         Instant timestamp
 ) {
 }

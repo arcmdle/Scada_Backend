@@ -4,7 +4,7 @@ import com.arcsolutions.scada_backend.infrastructure.dtos.SensorReadingMqtt;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public class SensorReadingMapper {
 
@@ -22,7 +22,7 @@ public class SensorReadingMapper {
                     sensorId,
                     raw.distance,
                     "cm",
-                    LocalDateTime.now()
+                    Instant.now()
             );
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error al deserializar lectura del sensor", e);
