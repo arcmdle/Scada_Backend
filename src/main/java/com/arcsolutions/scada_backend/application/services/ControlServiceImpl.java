@@ -29,7 +29,6 @@ public class ControlServiceImpl implements ControlService {
     private double setpoint = 50.0;
     private double hysteresis = 10.0;
 
-    // Estado anterior para evitar logs repetitivos
     private boolean lastPumpStatus;
     private boolean lastValveStatus;
 
@@ -42,8 +41,9 @@ public class ControlServiceImpl implements ControlService {
                 lastValveStatus ? "Abierta" : "Cerrada");
     }
 
+
     @Override
-    public void control() {
+    public void control(double setpoint) {
         if (!autoMode) return;
 
         double level = tankLevelService.getCurrentLevel().levelCm();
@@ -113,7 +113,7 @@ public class ControlServiceImpl implements ControlService {
 
         this.setpoint = reqDto.newValue();
         if (isAutoModeEnabled()) {
-            control();
+            control(this.setpoint);
         }
 
         SetpointResDto response = new SetpointResDto(this.setpoint, Instant.now());

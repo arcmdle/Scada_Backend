@@ -25,6 +25,6 @@ public interface ControlService {
 
     boolean isAutoModeEnabled();
 
-    void control();
+    void control(double setpoint);
 
 }

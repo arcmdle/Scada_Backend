@@ -48,7 +48,8 @@ public class SensorReadingHandler {
             tankLevelService.processingSensorReading(reading);
 
             try {
-                controlService.control();
+                double currentSetpoint = controlService.getSetpoint().setpoint();
+                controlService.control(currentSetpoint);
             } catch (RuntimeException ex) {
                 log.warn("⚠️ Control ignorado: {}", ex.getMessage());
             }
