@@ -33,7 +33,7 @@ public class MqttConfig {
     @Value("${mqtt.password:platinaL1}")
     private String mqttPassword;
 
- 
+
     public MqttConfig(SSLSocketFactory socketFactory) {
         this.socketFactory = socketFactory;
     }
