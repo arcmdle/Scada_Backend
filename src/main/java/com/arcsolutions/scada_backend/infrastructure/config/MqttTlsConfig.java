@@ -14,14 +14,12 @@ import java.security.cert.X509Certificate;
 
 @Configuration
 public class MqttTlsConfig {
-    String certPath = CertLoader.writeCertFromEnv("MQTT_CA_CERT_BASE64", "emqxsl-ca.crt");
-
-    public MqttTlsConfig() throws Exception {
-    }
 
 
     @Bean
     public SSLSocketFactory mqttSocketFactory() throws Exception {
+        String certPath = CertLoader.writeCertFromEnv("MQTT_CA_CERT_BASE64", "emqxsl-ca.crt");
+
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         FileInputStream fis = new FileInputStream(certPath);
         X509Certificate caCert = (X509Certificate) cf.generateCertificate(fis);
