@@ -29,8 +29,8 @@ public class ControlServiceImpl implements ControlService {
     private double hysteresis = 10.0;
 
     // Estado anterior para evitar logs repetitivos
-    private Boolean lastPumpStatus = null;
-    private Boolean lastValveStatus = null;
+    private Boolean lastPumpStatus = false;
+    private Boolean lastValveStatus = false;
 
     public void control() {
         if (!autoMode) return;
