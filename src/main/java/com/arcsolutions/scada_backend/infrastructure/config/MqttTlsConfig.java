@@ -1,6 +1,6 @@
 package com.arcsolutions.scada_backend.infrastructure.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.arcsolutions.scada_backend.utils.CertLoader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,13 +14,16 @@ import java.security.cert.X509Certificate;
 
 @Configuration
 public class MqttTlsConfig {
-    @Value("${mqtt.ca-cert}")
-    String caCertPath;
+    String certPath = CertLoader.writeCertFromEnv("MQTT_CA_CERT_BASE64", "emqxsl-ca.crt");
+
+    public MqttTlsConfig() throws Exception {
+    }
+
 
     @Bean
     public SSLSocketFactory mqttSocketFactory() throws Exception {
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        FileInputStream fis = new FileInputStream(caCertPath);
+        FileInputStream fis = new FileInputStream(certPath);
         X509Certificate caCert = (X509Certificate) cf.generateCertificate(fis);
 
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());

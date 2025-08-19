@@ -10,8 +10,5 @@ WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 
 
-# Copiar el certificado manualmente
-COPY src/main/resources/emqxsl-ca.crt ./emqxsl-ca.crt
-
 EXPOSE 3000
 ENTRYPOINT ["sh", "-c", "java -jar app.jar --server.port=${PORT}"]
