@@ -1,5 +1,5 @@
 server:
-  port: ${PORT}
+  port: ${PORT:3000}
 
 frontend:
   url: ${FRONTEND_URL:http://localhost:4200}

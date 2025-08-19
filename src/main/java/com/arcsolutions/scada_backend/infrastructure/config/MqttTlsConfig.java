@@ -1,31 +1,28 @@
 package com.arcsolutions.scada_backend.infrastructure.config;
 
-import java.io.ByteArrayInputStream;
-import java.security.KeyStore;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.Base64;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
 @Configuration
 public class MqttTlsConfig {
 
     @Bean
     public SSLSocketFactory mqttSocketFactory() throws Exception {
-        String base64Cert = System.getenv("MQTT_CA_CERT_BASE64");
-        if (base64Cert == null || base64Cert.isEmpty()) {
-            throw new IllegalStateException("MQTT_CA_CERT_BASE64 no está definida.");
+        InputStream certStream = getClass().getClassLoader().getResourceAsStream("certs/emqxsl-ca.crt");
+        if (certStream == null) {
+            throw new IllegalStateException("No se encontró el certificado en resources.");
         }
 
-        byte[] decoded = Base64.getDecoder().decode(base64Cert);
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        X509Certificate caCert = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(decoded));
+        X509Certificate caCert = (X509Certificate) cf.generateCertificate(certStream);
 
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         ks.load(null, null);

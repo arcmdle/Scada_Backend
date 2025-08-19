@@ -58,7 +58,7 @@ hs_err_pid*
 Thumbs.db
 
 # .gitignore
-*.crt
+#*.crt
 *.key
 cert.b64
 # 📦 Otros
