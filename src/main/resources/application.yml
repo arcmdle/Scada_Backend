@@ -1,0 +1,46 @@
+server:
+  port: ${SERVER_PORT:3000}
+
+frontend:
+  url: ${FRONTEND_URL:http://localhost:4200}
+
+auth:
+  cookie:
+    token-name: ${COOKIE_TOKEN_NAME:auth-token}
+    path: /
+    domain: ${COOKIE_DOMAIN:localhost}
+    http-only: true
+    secure: ${COOKIE_SECURE:true}
+    max-age: ${COOKIE_MAX_AGE:86400}
+    same-site: ${COOKIE_SAMESITE:None}
+
+security:
+  jwt:
+    secret-key: ${JWT_SECRET_KEY}
+    expiration: ${JWT_EXPIRATION:60}
+
+mqtt:
+  host: ${MQTT_HOST}
+  username: ${MQTT_USERNAME}
+  password: ${MQTT_PASSWORD}
+  ca-cert: ${MQTT_CA_CERT_PATH}
+
+logging:
+  level:
+    root: INFO
+    com.arcsolutions: INFO
+
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
