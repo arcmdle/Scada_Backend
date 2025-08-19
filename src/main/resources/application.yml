@@ -23,6 +23,7 @@ mqtt:
   host: ${MQTT_HOST}
   username: ${MQTT_USERNAME}
   password: ${MQTT_PASSWORD}
+  ca-cert: ${MQTT_CA_CERT_PATH}
 
 logging:
   level:

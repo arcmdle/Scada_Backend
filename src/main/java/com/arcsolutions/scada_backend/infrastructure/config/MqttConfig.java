@@ -17,8 +17,12 @@ import org.springframework.integration.router.HeaderValueRouter;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 
+import javax.net.ssl.SSLSocketFactory;
+
 @Configuration
 public class MqttConfig {
+    private final SSLSocketFactory socketFactory;
+
 
     @Value("${mqtt.host:tcp://localhost:1883}")
     private String mqttHost;
@@ -29,6 +33,13 @@ public class MqttConfig {
     @Value("${mqtt.password:platinaL1}")
     private String mqttPassword;
 
+    @Value("${mqtt.ca-cert}")
+    private String mqttCertPath;
+
+    public MqttConfig(SSLSocketFactory socketFactory) {
+        this.socketFactory = socketFactory;
+    }
+
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
         DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
@@ -36,6 +47,7 @@ public class MqttConfig {
         options.setServerURIs(new String[]{mqttHost});
         options.setUserName(mqttUsername);
         options.setPassword(mqttPassword.toCharArray());
+        options.setSocketFactory(socketFactory);
         options.setCleanSession(true);
         options.setConnectionTimeout(10);
         options.setKeepAliveInterval(30);
