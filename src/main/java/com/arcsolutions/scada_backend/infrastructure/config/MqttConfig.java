@@ -33,9 +33,7 @@ public class MqttConfig {
     @Value("${mqtt.password:platinaL1}")
     private String mqttPassword;
 
-    @Value("${mqtt.ca-cert}")
-    private String mqttCertPath;
-
+ 
     public MqttConfig(SSLSocketFactory socketFactory) {
         this.socketFactory = socketFactory;
     }

@@ -60,7 +60,7 @@ Thumbs.db
 # .gitignore
 *.crt
 *.key
-
+cert.b64
 # 📦 Otros
 *.bak
 *.tmp
