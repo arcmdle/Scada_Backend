@@ -1,9 +1,9 @@
-package com.arcsolutions.scada_backend.application.services;
+package com.arcsolutions.scada_backend.infrastructure.security;
 
 import com.arcsolutions.scada_backend.domain.services.TokenService;
+import com.arcsolutions.scada_backend.infrastructure.config.JwtProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,15 +21,12 @@ public class TokenServiceImpl implements TokenService {
     private final static Logger logger = LogManager.getLogger(TokenServiceImpl.class);
 
 
-    @Value("${security.jwt.secret-key}")
-    private String secretKey;
-    @Value("${security.jwt.expiration}")
-    private int jwtExpiration;
-
+    private final JwtProperties jwtProperties;
     private final JwtEncoder jwtEncoder;
     private final JwtDecoder jwtDecoder;
 
-    public TokenServiceImpl(JwtEncoder jwtEncoder, JwtDecoder jwtDecoder) {
+    public TokenServiceImpl(JwtProperties jwtProperties, JwtEncoder jwtEncoder, JwtDecoder jwtDecoder) {
+        this.jwtProperties = jwtProperties;
         this.jwtEncoder = jwtEncoder;
         this.jwtDecoder = jwtDecoder;
     }
@@ -46,7 +43,7 @@ public class TokenServiceImpl implements TokenService {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .subject(email)
                 .issuedAt(now)
-                .expiresAt(now.plus(jwtExpiration, ChronoUnit.MINUTES))
+                .expiresAt(now.plus(jwtProperties.getExpiration(), ChronoUnit.MINUTES))
                 .build();
         var jwtEncoderParameters = JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), claims);
         return this.jwtEncoder.encode(jwtEncoderParameters).getTokenValue();

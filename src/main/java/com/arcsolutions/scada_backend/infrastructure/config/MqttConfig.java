@@ -1,6 +1,7 @@
 package com.arcsolutions.scada_backend.infrastructure.config;
 
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.Router;
@@ -19,17 +20,22 @@ import org.springframework.messaging.MessageHandler;
 @Configuration
 public class MqttConfig {
 
-    private static final String HOST = "tcp://localhost:1883"; // si algún día metes el backend en Docker, usa "tcp://mosquitto:1883"
-    private static final String USER = "backend_user";
-    private static final String PASS = "platinaL1";
+    @Value("${mqtt.host:tcp://localhost:1883}")
+    private String mqttHost;
+
+    @Value("${mqtt.username:backend_user}")
+    private String mqttUsername;
+
+    @Value("${mqtt.password:platinaL1}")
+    private String mqttPassword;
 
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
         DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
         MqttConnectOptions options = new MqttConnectOptions();
-        options.setServerURIs(new String[]{HOST});
-        options.setUserName(USER);
-        options.setPassword(PASS.toCharArray());
+        options.setServerURIs(new String[]{mqttHost});
+        options.setUserName(mqttUsername);
+        options.setPassword(mqttPassword.toCharArray());
         options.setCleanSession(true);
         options.setConnectionTimeout(10);
         options.setKeepAliveInterval(30);
@@ -38,7 +44,6 @@ public class MqttConfig {
         return factory;
     }
 
-    // Outbound (publicación)
     @Bean
     public MessageChannel mqttOutboundChannel() {
         return new DirectChannel();
@@ -83,10 +88,8 @@ public class MqttConfig {
         return router;
     }
 
-
     @Bean
     public MessageProducer mqttInboundAdapter(MqttPahoClientFactory factory) {
-        // IMPORTANTE: usar el constructor que recibe el factory (así aplica las credenciales)
         MqttPahoMessageDrivenChannelAdapter adapter =
                 new MqttPahoMessageDrivenChannelAdapter(
                         "scada_backend_inbound",

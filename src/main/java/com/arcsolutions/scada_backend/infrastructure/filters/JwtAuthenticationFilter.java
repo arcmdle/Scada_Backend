@@ -1,6 +1,6 @@
 package com.arcsolutions.scada_backend.infrastructure.filters;
 
-import com.arcsolutions.scada_backend.application.AuthCookieConstants;
+import com.arcsolutions.scada_backend.application.AuthCookieProperties;
 import com.arcsolutions.scada_backend.domain.services.AuthService;
 import com.arcsolutions.scada_backend.infrastructure.config.SecurityConfig;
 import jakarta.servlet.FilterChain;
@@ -27,6 +27,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final AuthService authService;
     private final UserDetailsService userDetailsService;
+    private final AuthCookieProperties authCookieProperties;
 
     // Endpoints públicos que no deben pasar por el filtro
     private static final String[] PUBLIC_ENDPOINTS = {
@@ -34,9 +35,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             SecurityConfig.REGISTER_URL_MATCHER
     };
 
-    public JwtAuthenticationFilter(AuthService authService, UserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(AuthService authService, UserDetailsService userDetailsService, AuthCookieProperties authCookieProperties) {
         this.authService = authService;
         this.userDetailsService = userDetailsService;
+        this.authCookieProperties = authCookieProperties;
     }
 
     @Override
@@ -83,7 +85,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         return Arrays.stream(cookies)
-                .filter(cookie -> AuthCookieConstants.TOKEN_COOKIE_NAME.equals(cookie.getName()))
+                .filter(cookie -> authCookieProperties.getTokenName().equals(cookie.getName()))
                 .map(Cookie::getValue)
                 .findFirst();
     }

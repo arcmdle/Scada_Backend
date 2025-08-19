@@ -1,6 +1,6 @@
 package com.arcsolutions.scada_backend.infrastructure.controllers;
 
-import com.arcsolutions.scada_backend.application.AuthCookieConstants;
+import com.arcsolutions.scada_backend.application.AuthCookieProperties;
 import com.arcsolutions.scada_backend.domain.services.AuthService;
 import com.arcsolutions.scada_backend.infrastructure.config.ApiConfig;
 import com.arcsolutions.scada_backend.infrastructure.dtos.CreateUserDto;
@@ -22,14 +22,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final AuthCookieProperties authCookieProperties;
 
     /**
      * Constructor que inyecta el servicio de autenticación.
      *
      * @param authService Servicio que maneja la lógica de autenticación.
      */
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, AuthCookieProperties authCookieProperties) {
         this.authService = authService;
+        this.authCookieProperties = authCookieProperties;
     }
 
     @PostMapping("/register")
@@ -64,16 +66,15 @@ public class AuthController {
      */
     @PostMapping("/logout")
     public void logout(HttpServletResponse response) {
-        final Cookie cookie = new Cookie(AuthCookieConstants.TOKEN_COOKIE_NAME, "");
-        cookie.setHttpOnly(AuthCookieConstants.HTTP_ONLY);
-        cookie.setSecure(AuthCookieConstants.COOKIE_SECURE);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        cookie.setAttribute("SAME_SITE_KEY", AuthCookieConstants.SAME_SITE);
+        final Cookie cookie = new Cookie(authCookieProperties.getTokenName(), "");
+        cookie.setHttpOnly(authCookieProperties.isHttpOnly());
+        cookie.setSecure(authCookieProperties.isSecure());
+        cookie.setPath(authCookieProperties.getPath());
+        cookie.setMaxAge(0); // Elimina la cookie
+        cookie.setAttribute("SameSite", authCookieProperties.getSameSite());
         response.addCookie(cookie);
-
-
     }
+
 
     /**
      * Crea una cookie de autenticación con los atributos definidos en AuthCookieConstants.
@@ -82,13 +83,13 @@ public class AuthController {
      * @return Cookie configurada para autenticación.
      */
     private Cookie createAuthCookie(String token) {
-        final String SAME_SITE_KEY = "None";
-        final Cookie cookie = new Cookie(AuthCookieConstants.TOKEN_COOKIE_NAME, token);
-        cookie.setHttpOnly(AuthCookieConstants.HTTP_ONLY);
-        cookie.setSecure(AuthCookieConstants.COOKIE_SECURE);
-        cookie.setPath("/");
-        cookie.setMaxAge(AuthCookieConstants.COOKIE_MAX_AGE);
-        cookie.setAttribute(SAME_SITE_KEY, AuthCookieConstants.SAME_SITE);
+        final Cookie cookie = new Cookie(authCookieProperties.getTokenName(), token);
+        cookie.setHttpOnly(authCookieProperties.isHttpOnly());
+        cookie.setSecure(authCookieProperties.isSecure());
+        cookie.setPath(authCookieProperties.getPath());
+        cookie.setMaxAge(authCookieProperties.getMaxAge());
+        cookie.setAttribute("SameSite", authCookieProperties.getSameSite());
         return cookie;
     }
+
 }

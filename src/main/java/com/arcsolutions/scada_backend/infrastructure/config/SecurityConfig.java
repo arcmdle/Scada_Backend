@@ -1,11 +1,12 @@
 package com.arcsolutions.scada_backend.infrastructure.config;
 
-import com.arcsolutions.scada_backend.application.AuthCookieConstants;
+import com.arcsolutions.scada_backend.application.AuthCookieProperties;
 import com.arcsolutions.scada_backend.domain.services.AuthService;
 import com.arcsolutions.scada_backend.infrastructure.filters.JwtAuthenticationFilter;
 import jakarta.servlet.Filter;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -34,11 +35,13 @@ public class SecurityConfig {
     private final AuthService authService;
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
+    private final AuthCookieProperties authCookieProperties;
 
-    public SecurityConfig(AuthService authService, UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+    public SecurityConfig(AuthService authService, UserDetailsService userDetailsService, PasswordEncoder passwordEncoder, AuthCookieProperties authCookieProperties) {
         this.authService = authService;
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
+        this.authCookieProperties = authCookieProperties;
     }
 
     public static final String REGISTER_URL_MATCHER = ApiConfig.API_BASE_PATH + "/auth/register";
@@ -65,13 +68,13 @@ public class SecurityConfig {
                         .logoutUrl(LOG_OUT_URL_MATCHER)
                         .logoutSuccessHandler((request, response, authentication) -> {
                             response.setStatus(HttpStatus.NO_CONTENT.value());
-                            Cookie cookie = new Cookie(AuthCookieConstants.TOKEN_COOKIE_NAME, null);
-                            cookie.setPath(AuthCookieConstants.COOKIE_PATH);
-                            cookie.setDomain(AuthCookieConstants.COOKIE_DOMAIN);
-                            cookie.setHttpOnly(AuthCookieConstants.HTTP_ONLY);
+                            Cookie cookie = new Cookie(authCookieProperties.getTokenName(), null);
+                            cookie.setPath(authCookieProperties.getPath());
+                            cookie.setDomain(authCookieProperties.getDomain());
+                            cookie.setHttpOnly(authCookieProperties.isHttpOnly());
                             cookie.setMaxAge(0);
-                            cookie.setSecure(AuthCookieConstants.COOKIE_SECURE);
-                            cookie.setAttribute("SAME_SITE_KEY", AuthCookieConstants.SAME_SITE);
+                            cookie.setSecure(authCookieProperties.isSecure());
+                            cookie.setAttribute("SameSite", authCookieProperties.getSameSite());
 
 
                             response.addCookie(cookie);
@@ -95,20 +98,24 @@ public class SecurityConfig {
         return new ProviderManager(provider);
     }
 
+    @Value("${frontend.url:http://localhost:4200}")
+    private String frontendUrl;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:4200")); // 👈 tu frontend
+        config.setAllowedOrigins(List.of(frontendUrl)); //
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        config.setAllowCredentials(true); // si usas cookies o sesiones
+        config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
     }
 
+
     private JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(authService, userDetailsService);
+        return new JwtAuthenticationFilter(authService, userDetailsService, authCookieProperties);
     }
 }
