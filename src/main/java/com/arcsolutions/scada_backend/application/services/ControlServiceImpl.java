@@ -5,6 +5,7 @@ import com.arcsolutions.scada_backend.domain.ports.ValveController;
 import com.arcsolutions.scada_backend.domain.services.ControlService;
 import com.arcsolutions.scada_backend.domain.services.TankLevelService;
 import com.arcsolutions.scada_backend.infrastructure.dtos.*;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.MessagingException;
@@ -29,9 +30,19 @@ public class ControlServiceImpl implements ControlService {
     private double hysteresis = 10.0;
 
     // Estado anterior para evitar logs repetitivos
-    private Boolean lastPumpStatus = false;
-    private Boolean lastValveStatus = false;
+    private boolean lastPumpStatus;
+    private boolean lastValveStatus;
 
+    @PostConstruct
+    public void initStatus() {
+        lastPumpStatus = pumpController.isOn();
+        lastValveStatus = valveController.isOn();
+        log.info("🟢 Estado inicial sincronizado → Bomba: {}, Válvula: {}",
+                lastPumpStatus ? "Encendida" : "Apagada",
+                lastValveStatus ? "Abierta" : "Cerrada");
+    }
+
+    @Override
     public void control() {
         if (!autoMode) return;
 
@@ -47,14 +58,12 @@ public class ControlServiceImpl implements ControlService {
             valveShouldBeOn = true;
         }
 
-        // Solo loguear si hay cambio de estado
         if (pumpShouldBeOn != lastPumpStatus || valveShouldBeOn != lastValveStatus) {
             log.info("Cambio de estado → Bomba: {}, Válvula: {}",
                     pumpShouldBeOn ? "ON" : "OFF",
                     valveShouldBeOn ? "ON" : "OFF");
         }
 
-        // Aplicar cambios físicos
         if (pumpShouldBeOn) {
             pumpController.turnOn();
         } else {
@@ -67,7 +76,6 @@ public class ControlServiceImpl implements ControlService {
             valveController.turnOff();
         }
 
-        // Actualizar estado y enviar al dashboard
         updateStatus(pumpShouldBeOn, valveShouldBeOn, now);
         lastPumpStatus = pumpShouldBeOn;
         lastValveStatus = valveShouldBeOn;
