@@ -24,39 +24,53 @@ public class ControlServiceImpl implements ControlService {
     private final ValveController valveController;
     private final SimpMessagingTemplate messagingTemplate;
 
-
     private boolean autoMode = true;
-    private double setpoint = 50.0; //
-    private double hysteresis = 10.0; //
+    private double setpoint = 50.0;
+    private double hysteresis = 10.0;
 
+    // Estado anterior para evitar logs repetitivos
+    private Boolean lastPumpStatus = null;
+    private Boolean lastValveStatus = null;
 
     public void control() {
         if (!autoMode) return;
 
-
         double level = tankLevelService.getCurrentLevel().levelCm();
-
         Instant now = Instant.now();
+
+        boolean pumpShouldBeOn = false;
+        boolean valveShouldBeOn = false;
+
         if (level < setpoint - hysteresis) {
-
-            pumpController.turnOn();
-            valveController.turnOff();
-            updateStatus(true, false, now);
-            log.info("Nivel bajo → Bomba ON, Válvula OFF");
+            pumpShouldBeOn = true;
         } else if (level > setpoint + hysteresis) {
-            // Nivel alto → activar válvula, desactivar bomba
-            pumpController.turnOff();
-            valveController.turnOn();
-            updateStatus(false, true, now);
-            log.info("Nivel alto → Bomba OFF, Válvula ON");
-
-        } else {
-            // Nivel dentro del rango
-            pumpController.turnOff();
-            valveController.turnOff();
-            updateStatus(false, false, now);
-            log.info("Nivel estable → Bomba OFF, Válvula OFF");
+            valveShouldBeOn = true;
         }
+
+        // Solo loguear si hay cambio de estado
+        if (pumpShouldBeOn != lastPumpStatus || valveShouldBeOn != lastValveStatus) {
+            log.info("Cambio de estado → Bomba: {}, Válvula: {}",
+                    pumpShouldBeOn ? "ON" : "OFF",
+                    valveShouldBeOn ? "ON" : "OFF");
+        }
+
+        // Aplicar cambios físicos
+        if (pumpShouldBeOn) {
+            pumpController.turnOn();
+        } else {
+            pumpController.turnOff();
+        }
+
+        if (valveShouldBeOn) {
+            valveController.turnOn();
+        } else {
+            valveController.turnOff();
+        }
+
+        // Actualizar estado y enviar al dashboard
+        updateStatus(pumpShouldBeOn, valveShouldBeOn, now);
+        lastPumpStatus = pumpShouldBeOn;
+        lastValveStatus = valveShouldBeOn;
     }
 
     private void updateStatus(boolean pumpStatus, boolean valveStatus, Instant timestamp) {
@@ -69,9 +83,8 @@ public class ControlServiceImpl implements ControlService {
         try {
             messagingTemplate.convertAndSend(topic, payload);
         } catch (MessagingException e) {
-            log.error("Error al enviar actualizacion de estado", e);
+            log.error("Error al enviar actualización de estado", e);
         }
-
     }
 
     @Override
@@ -81,15 +94,12 @@ public class ControlServiceImpl implements ControlService {
 
     @Override
     public void updateSetpoint(SetpointReqDto reqDto) {
-        // en un futuro los cambios se guardaran en una entidad y se persistiran.
-        //validaciones
         if (reqDto.newValue() < 0 || reqDto.newValue() > MAX_HEIGHT_CM) {
-            log.error("Setpoint fuera de rango.");
+            log.warn("Setpoint fuera de rango: {}", reqDto.newValue());
             return;
-
         }
         if (this.setpoint == reqDto.newValue()) {
-            log.error("El setpoint ya fue previamente establecido. No se haran cambios");
+            log.debug("Setpoint ya establecido. No se harán cambios.");
             return;
         }
 
@@ -97,37 +107,30 @@ public class ControlServiceImpl implements ControlService {
         if (isAutoModeEnabled()) {
             control();
         }
-        SetpointResDto response = new SetpointResDto(this.setpoint, Instant.now());
 
+        SetpointResDto response = new SetpointResDto(this.setpoint, Instant.now());
         try {
-            String topic = "/topic/setpoint";
-            messagingTemplate.convertAndSend(topic, response);
+            messagingTemplate.convertAndSend("/topic/setpoint", response);
             log.info("Setpoint actualizado de {} a {} por {} en {}",
                     reqDto.priorValue(), reqDto.newValue(), reqDto.blame(), reqDto.timestamp());
-
         } catch (MessagingException e) {
-            log.error("Error al enviar la actualizacion del setpoint al dashboard");
+            log.error("Error al enviar la actualización del setpoint al dashboard", e);
         }
-
     }
 
     @Override
     public double getHysteresis() {
-        // esto debe pedirse por mqtt
         return hysteresis;
+    }
+
+    @Override
+    public void updateHysteresis(double hysteresis) {
+        this.hysteresis = hysteresis;
     }
 
     @Override
     public void enableManualMode() {
         this.autoMode = false;
-    }
-
-
-    @Override
-    public void updateHysteresis(double hysteresis) {
-        // esto debe enviarse por mqtt
-
-        this.hysteresis = hysteresis;
     }
 
     @Override
@@ -152,13 +155,10 @@ public class ControlServiceImpl implements ControlService {
         } else {
             pumpController.turnOff();
         }
-
     }
 
     @Override
     public boolean isAutoModeEnabled() {
         return autoMode;
     }
-
-
 }

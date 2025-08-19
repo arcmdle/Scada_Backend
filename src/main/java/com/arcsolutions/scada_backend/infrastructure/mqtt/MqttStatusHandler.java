@@ -2,10 +2,12 @@ package com.arcsolutions.scada_backend.infrastructure.mqtt;
 
 import com.arcsolutions.scada_backend.domain.ports.PumpController;
 import com.arcsolutions.scada_backend.domain.ports.ValveController;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class MqttStatusHandler {
     private final PumpController pumpController;
@@ -29,19 +31,19 @@ public class MqttStatusHandler {
                 handleValveStatus(payload);
                 break;
             default:
-                System.out.println("Topic desconocido: " + topic);
+                log.warn("🔍 Topic desconocido recibido: {}", topic);
         }
     }
 
     private void handlePumpStatus(String payload) {
         boolean isOn = "ON".equalsIgnoreCase(payload);
         pumpController.updateStatus(isOn);
-        System.out.println("Estado actualizado de la bomba: " + (isOn ? "Encendida" : "Apagada"));
+        log.debug("🚰 Estado de la bomba actualizado a: {}", isOn ? "Encendida" : "Apagada");
     }
 
     private void handleValveStatus(String payload) {
         boolean isOpen = "ON".equalsIgnoreCase(payload);
         valveController.updateStatus(isOpen);
-        System.out.println("Estado actualizado de la válvula: " + (isOpen ? "Abierta" : "Cerrada"));
+        log.debug("🔧 Estado de la válvula actualizado a: {}", isOpen ? "Abierta" : "Cerrada");
     }
 }

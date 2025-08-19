@@ -2,8 +2,10 @@ package com.arcsolutions.scada_backend.infrastructure;
 
 import com.arcsolutions.scada_backend.domain.ports.PumpController;
 import com.arcsolutions.scada_backend.infrastructure.mqtt.MqttCommandGateway;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class PumpControllerImpl implements PumpController {
     private final MqttCommandGateway gateway;
@@ -19,17 +21,14 @@ public class PumpControllerImpl implements PumpController {
         return this.isOn;
     }
 
-
     @Override
     public void turnOn() {
         if (!isOn) {
             gateway.sendPumpCommand(COMMAND_TOPIC, "ON");
             isOn = true;
-
+        } else {
+            log.debug("⚠️ La bomba ya está encendida. No se requiere acción.");
         }
-        System.out.println("⚠️ La bomba ya está esta encendida. No se requiere acción.");
-
-
     }
 
     @Override
@@ -37,10 +36,9 @@ public class PumpControllerImpl implements PumpController {
         if (isOn) {
             gateway.sendPumpCommand(COMMAND_TOPIC, "OFF");
             isOn = false;
+        } else {
+            log.debug("⚠️ La bomba ya está apagada. No se requiere acción.");
         }
-        System.out.println("⚠️ La bomba ya está apagada. No se requiere acción.");
-
-
     }
 
     @Override

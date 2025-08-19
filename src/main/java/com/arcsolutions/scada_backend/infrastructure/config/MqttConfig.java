@@ -46,7 +46,7 @@ public class MqttConfig {
         options.setUserName(mqttUsername);
         options.setPassword(mqttPassword.toCharArray());
         options.setSocketFactory(socketFactory);
-        options.setCleanSession(true);
+        options.setCleanSession(false);
         options.setConnectionTimeout(20);
         options.setKeepAliveInterval(60);
         options.setAutomaticReconnect(true);
